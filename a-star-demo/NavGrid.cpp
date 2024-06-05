@@ -24,21 +24,13 @@ NavGrid::NavGrid(int _width, int _height, Vector4 _bounds) {
 	//}
 }
 
-void NavGrid::highlightCell(int2 pos, Color color) {
-	if (!valid(pos)) {
-		return;
-	}
-
-	DrawRectangle(bounds.x + pos.x * cellWidth, bounds.y + pos.y * cellHeight, cellWidth, cellHeight, color);
-}
-
 void NavGrid::draw() {
 	if (valid(goalPos)) {
 		highlightCell(goalPos, ORANGE);
 	}
 
 	if (valid(startPos)) {
-		highlightCell(startPos, BLUE);
+		highlightCell(startPos, GREEN);
 	}
 
 	for (int x = 0; x < width; x++) {

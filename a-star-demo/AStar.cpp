@@ -3,13 +3,10 @@
 #include <algorithm>
 #include <functional>
 
-AStar::AStar(NavGrid* _grid, int2 _startPos, int2 _destPos) {
+AStar::AStar(NavGrid* _grid) {
 	grid = _grid;
 
-	startPos = _startPos;
-	destPos = _destPos;
-
-	startNode = new Node{ startPos, 0, getDist(startPos, destPos), nullptr };
+	startNode = nullptr;
 	currentNode = nullptr;
 
 	container = Array<Node*>(0, 16);
@@ -18,24 +15,13 @@ AStar::AStar(NavGrid* _grid, int2 _startPos, int2 _destPos) {
 	closedNodes = Array<Node*>(0, 16);
 
 	pathFound = false;
-	noPathFound = false;
-
-	container.append(startNode);
-	openNodes.append(startNode);
+	running = false;
 }
 
 AStar::~AStar() {
 	for (int i = 0; i < container.getCount(); i++) {
 		delete container[i];
 	}
-}
-
-bool AStar::validPos(int2 pos) {
-	if (!grid->valid(pos)) {
-		return false;
-	}
-
-	return !grid->isBlocked(pos);
 }
 
 float AStar::getDist(int2 pos1, int2 pos2) {
@@ -53,7 +39,7 @@ Array<int2> AStar::getAdjPositions(int2 pos) {
 
 	for (int i = 0; i < 8; i++) {
 		int2 adjPos = pos + offsets[i];
-		if (validPos(adjPos)) {
+		if (!grid->isBlocked(adjPos)) {
 			adjPositions.append(adjPos);
 		}
 	}
@@ -86,7 +72,7 @@ void AStar::restart() {
 		delete container[i];
 	}
 
-	startNode = new Node{ startPos, 0, getDist(startPos, destPos), nullptr };
+	startNode = nullptr;
 	currentNode = nullptr;
 
 	container = Array<Node*>(0, 16);
@@ -95,19 +81,26 @@ void AStar::restart() {
 	closedNodes = Array<Node*>(0, 16);
 
 	pathFound = false;
-	noPathFound = false;
+	running = false;
+}
 
+void AStar::setup() {
+	startNode = new Node{ grid->getStartPos(), 0, getDist(grid->getStartPos(), grid->getGoalPos()), nullptr };
 	container.append(startNode);
 	openNodes.append(startNode);
 }
 
 void AStar::update() {
-	if (pathFound || noPathFound) {
+	if (pathFound) {
 		return;
+	}
+	if (!running) {
+		setup();
+		running = true;
 	}
 
 	if (openNodes.getCount() == 0) {
-		noPathFound = false;
+		running = false;
 		return;
 	}
 
@@ -116,8 +109,9 @@ void AStar::update() {
 
 	currentNode = openNodes[0];
 
-	if (currentNode->pos == destPos) {
+	if (currentNode->pos == grid->getGoalPos()) {
 		pathFound = true;
+		running = false;
 		return;
 	}
 
@@ -132,7 +126,7 @@ void AStar::update() {
 		}
 
 		float gCost = currentNode->gCost + getDist(currentNode->pos, adjPositions[i]);
-		float hCost = getDist(adjPositions[i], destPos);
+		float hCost = getDist(adjPositions[i], grid->getGoalPos());
 		float fCost = gCost + hCost;
 
 		int index = searchOpenNodes(adjPositions[i]);
@@ -149,7 +143,7 @@ void AStar::update() {
 
 void AStar::draw() {
 	for (int i = 0; i < openNodes.getCount(); i++) {
-		grid->highlightCell(openNodes[i]->pos, GREEN);
+		grid->highlightCell(openNodes[i]->pos, BLUE);
 	}
 	for (int i = 0; i < closedNodes.getCount(); i++) {
 		grid->highlightCell(closedNodes[i]->pos, RED);

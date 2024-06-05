@@ -20,7 +20,7 @@ int main() {
 	navGrid.setStartPos(int2 { 1, 10 });
 	navGrid.setGoalPos(int2 { 18, 12 });
 
-	AStar astar(&navGrid, { 1, 10 }, { 18, 12 });
+	AStar astar(&navGrid);
 
 	float period = 0.1;
 	float timer = period;
@@ -30,14 +30,28 @@ int main() {
 		// Updates
 		float delta = GetFrameTime();
 
-		if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-			navGrid.insertBlock((Vector2)GetMousePosition());
+		if (!astar.running) {
+			if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+				navGrid.insertBlock(GetMousePosition());
+			}
+			else if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {
+				navGrid.clearBlock(GetMousePosition());
+			}
+
+			if (IsKeyReleased(KEY_S)) {
+				navGrid.setStartPos(GetMousePosition());
+			}
+			if (IsKeyReleased(KEY_G)) {
+				navGrid.setGoalPos(GetMousePosition());
+			}
 		}
-		else if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {
-			navGrid.clearBlock(GetMousePosition());
+
+		if (IsKeyReleased(KEY_R)) {
+			astar.restart();
 		}
 
 		if (IsKeyReleased(KEY_SPACE)) {
+			timer = period;
 			paused = !paused;
 		}
 
@@ -67,10 +81,54 @@ int main() {
 
 		Vector2 mouse = GetMousePosition();
 		int2 mouseGrid = navGrid.findGridPos(mouse);
-		std::string mouseInfo;
-		mouseInfo += "mouse pos: x:" + std::to_string(mouse.x) + ", " + std::to_string(mouse.y);
-		mouseInfo += "\ngrid pos: x:" + std::to_string(mouseGrid.x) + ", " + std::to_string(mouseGrid.y);
+		std::string mouseInfo = "Mouse pos:";
+		mouseInfo += "\nscreen: x:" + std::to_string(mouse.x) + ", " + std::to_string(mouse.y);
+		mouseInfo += "\ngrid: x:" + std::to_string(mouseGrid.x) + ", " + std::to_string(mouseGrid.y);
 		DrawText(mouseInfo.c_str(), 10, 200, 20, BLACK);
+
+		std::string status = "Status: ";
+		if (paused) {
+			status += "paused\n";
+		}
+		else {
+			status += "playing\n";
+		}
+		status += "Pathfinding: ";
+		if (astar.running) {
+			status += "running\n";
+		}
+		else {
+			status += "done\n";
+			
+			if (astar.pathFound) {
+				status += "Path found";
+			}
+			else {
+				status += "Path not found";
+			}
+		}
+
+		DrawText(status.c_str(), 10, 400, 20, BLACK);
+
+		std::string explanation;
+		explanation += "Blue is Start cell\n";
+		explanation += "Orange is Goal cell\n";
+		explanation += "Black cells are obstacles/walls\n";
+		explanation += "Green cells are ready for searching\n";
+		explanation += "Red cell are already searched\n";
+		explanation += "Purple cells show current shortest path";
+		DrawText(explanation.c_str(), screenWidth - 450, 100, 20, BLACK);
+
+		std::string controls;
+		controls += "Space is play/pause\n";
+		controls += "Right arrow is step forward\n";
+		controls += "R key is restart\n\n";
+		controls += "Immediately after restart,\nthese controls can be used:\n";
+		controls += "S key changes start cell to hovered cell\n";
+		controls += "G key changes goal cell to hovered cell\n";
+		controls += "Left click places wall cell\n";
+		controls += "Right click removes wall cell\n";
+		DrawText(controls.c_str(), screenWidth - 450, 350, 20, BLACK);
 
 		navGrid.showInfo(10, 40);
 		astar.showInfo(10, 100);
