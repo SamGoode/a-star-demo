@@ -3,12 +3,10 @@
 #include "int2.h"
 
 class NavGrid {
-public:
-	int width;
-	int height;
-
 private:
 	Vector4 bounds;
+	int width;
+	int height;
 	float cellWidth;
 	float cellHeight;
 	int2 startPos;
@@ -25,7 +23,7 @@ public:
 	bool valid(int2 pos) { return pos.x >= 0 && pos.x < width && pos.y >= 0 && pos.y < height; }
 	bool isBlocked(int2 pos) { if (!valid(pos)) { return true; } return bitmap[pos.x + pos.y * width]; }
 	
-	int2 getStartPos() { return startPos; }
+	int2 getStartPos() { return startPos; };
 	int2 getGoalPos() { return goalPos; }
 	void setStartPos(int2 pos) { if (!valid(pos)) { return; } startPos = pos; }
 	void setGoalPos(int2 pos) { if (!valid(pos)) { return; } goalPos = pos; }

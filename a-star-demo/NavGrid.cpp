@@ -3,25 +3,15 @@
 
 
 NavGrid::NavGrid(int _width, int _height, Vector4 _bounds) {
+	bounds = _bounds;
 	width = _width;
 	height = _height;
-
-	bounds = _bounds;
 	cellWidth = (bounds.z - bounds.x) / width;
 	cellHeight = (bounds.w - bounds.y) / height;
 	startPos = { -1, -1 };
 	goalPos = { -1, -1 };
 
 	bitmap = new bool[width * height] {false};
-
-	//for (int x = 5; x < 15; x++) {
-	//	//bitmap[x + 15 * width] = true;
-	//	insertBlock(int2 { x, 15 });
-	//}
-	//for (int y = 5; y < 15; y++) {
-	//	//bitmap[10 + y * width] = true;
-	//	insertBlock(int2{ 10, y });
-	//}
 }
 
 void NavGrid::draw() {
