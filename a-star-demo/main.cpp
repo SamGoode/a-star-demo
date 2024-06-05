@@ -13,7 +13,7 @@ int main() {
 
 	InitWindow(screenWidth, screenHeight, "A* Pathfinding Demo");
 
-	//SetTargetFPS(240);
+	SetTargetFPS(240);
 
 	NavGrid navGrid(20, 20, { 500, 100, (float)screenWidth - 500, (float)screenHeight - 100 });
 
