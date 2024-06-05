@@ -1,16 +1,34 @@
 #include "NavGrid.h"
+#include <string>
 
-NavGrid::NavGrid(Vector4 _bounds, int _width, int _height) {
-	bounds = _bounds;
+
+NavGrid::NavGrid(int _width, int _height, Vector4 _bounds) {
 	width = _width;
 	height = _height;
+
+	bounds = _bounds;
 	cellWidth = (bounds.z - bounds.x) / width;
 	cellHeight = (bounds.w - bounds.y) / height;
 	startPos = { -1, -1 };
 	goalPos = { -1, -1 };
+
+	bitmap = new bool[width * height] {false};
+
+	//for (int x = 5; x < 15; x++) {
+	//	//bitmap[x + 15 * width] = true;
+	//	insertBlock(int2 { x, 15 });
+	//}
+	//for (int y = 5; y < 15; y++) {
+	//	//bitmap[10 + y * width] = true;
+	//	insertBlock(int2{ 10, y });
+	//}
 }
 
 void NavGrid::highlightCell(int2 pos, Color color) {
+	if (!valid(pos)) {
+		return;
+	}
+
 	DrawRectangle(bounds.x + pos.x * cellWidth, bounds.y + pos.y * cellHeight, cellWidth, cellHeight, color);
 }
 
@@ -20,7 +38,15 @@ void NavGrid::draw() {
 	}
 
 	if (valid(startPos)) {
-		//highlightCell(startPos, GREEN);
+		highlightCell(startPos, BLUE);
+	}
+
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			if (bitmap[x + y * width]) {
+				highlightCell({ x, y }, BLACK);
+			}
+		}
 	}
 
 	DrawRectangleLines(bounds.x, bounds.y, bounds.z - bounds.x, bounds.w - bounds.y, BLACK);
